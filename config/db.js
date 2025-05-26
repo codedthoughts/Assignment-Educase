@@ -2,11 +2,15 @@ const mysql = require('mysql2/promise');
 require('dotenv').config();
 
 let sslConfig;
-if (process.env.DB_SSL === 'true') {
+
+if (process.env.DB_SSL && process.env.DB_SSL.toLowerCase() === 'true') {
   sslConfig = { rejectUnauthorized: false };
 } else {
-  sslConfig = undefined; // explicitly no SSL config
+  sslConfig = undefined;  // explicitly undefined, no SSL
 }
+
+console.log('DB_SSL env:', process.env.DB_SSL);
+console.log('sslConfig:', sslConfig);
 
 const pool = process.env.MYSQL_URL
   ? mysql.createPool(process.env.MYSQL_URL)
@@ -23,8 +27,6 @@ const pool = process.env.MYSQL_URL
       connectTimeout: 60000
     });
 
-
-// Test the connection
 pool.getConnection()
   .then(connection => {
     console.log('Database connection established successfully');
