@@ -1,8 +1,14 @@
 const mysql = require('mysql2/promise');
 require('dotenv').config();
 
-// Create the connection pool using URL if available
-const pool = process.env.MYSQL_URL 
+let sslConfig;
+if (process.env.DB_SSL === 'true') {
+  sslConfig = { rejectUnauthorized: false };
+} else {
+  sslConfig = undefined; // explicitly no SSL config
+}
+
+const pool = process.env.MYSQL_URL
   ? mysql.createPool(process.env.MYSQL_URL)
   : mysql.createPool({
       host: process.env.DB_HOST,
@@ -10,12 +16,13 @@ const pool = process.env.MYSQL_URL
       password: process.env.DB_PASSWORD,
       database: process.env.DB_NAME,
       port: process.env.DB_PORT || 3306,
-      ssl: process.env.DB_SSL === 'true' ? { rejectUnauthorized: false } : undefined,
+      ssl: sslConfig,
       waitForConnections: true,
       connectionLimit: 10,
       queueLimit: 0,
       connectTimeout: 60000
     });
+
 
 // Test the connection
 pool.getConnection()
